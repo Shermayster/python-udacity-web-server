@@ -45,6 +45,7 @@ import http.server
 import requests
 from urllib.parse import unquote, parse_qs
 import os
+from SocketServer import ThreadingMixIn
 
 memory = {}
 
@@ -66,6 +67,8 @@ form = '''<!DOCTYPE html>
 {}
 </pre>
 '''
+class ThreadHTTPServer(ThreadingMixIn, http.server.HTTPServer):
+    "This is an HTTPServer that supports thread-based concurrency."
 
 
 def CheckURI(uri, timeout=5):
@@ -162,6 +165,7 @@ class Shortener(http.server.BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    server_address = ('', int(os.environ.get('PORT', '8000')))
-    httpd = http.server.HTTPServer(server_address, Shortener)
+    port = int(os.environ.get('PORT', 8000))
+    server_address = ('', port)
+    httpd = ThreadHTTPServer(server_address, Shortener)
     httpd.serve_forever()
